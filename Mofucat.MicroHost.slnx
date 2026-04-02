@@ -3,6 +3,7 @@
     <Project Path="Example/Example.csproj" />
   </Folder>
   <Folder Name="/Library/">
+    <Project Path="Mofucat.MicroHost.Core/Mofucat.MicroHost.Core.csproj" Id="f921c58b-4fa8-4407-bb13-6f1577f75a0d" />
     <Project Path="Mofucat.MicroHost/Mofucat.MicroHost.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">

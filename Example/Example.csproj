@@ -6,4 +6,8 @@
     <CodeAnalysisRuleSet>..\Analyzers.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Mofucat.MicroHost\Mofucat.MicroHost.csproj" />
+  </ItemGroup>
+
 </Project>

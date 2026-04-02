@@ -2,12 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <CodeAnalysisRuleSet>..\Analyzers.ruleset</CodeAnalysisRuleSet>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>Mofucat.MicroHost</PackageId>
-    <Title>Mofucat.MicroHost</Title>
+    <PackageId>Mofucat.MicroHost.Core</PackageId>
+    <Title>Mofucat.MicroHost.Core</Title>
     <Description>Micro hosting</Description>
     <PackageTags>host</PackageTags>
   </PropertyGroup>
@@ -21,10 +22,6 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.5" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Mofucat.MicroHost.Core\Mofucat.MicroHost.Core.csproj" />
   </ItemGroup>
 
 </Project>
