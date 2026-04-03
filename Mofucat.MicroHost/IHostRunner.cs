@@ -1,6 +1,6 @@
 namespace Mofucat.MicroHost;
 
-internal interface IHostRunner
+public interface IHostRunner
 {
     ValueTask RunAsync(string[] args);
 }
