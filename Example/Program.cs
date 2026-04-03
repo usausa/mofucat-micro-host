@@ -1,3 +1,6 @@
+#pragma warning disable IDE0210
+#pragma warning disable CA1812
+#pragma warning disable CA1848
 namespace Example;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +18,9 @@ internal static class Program
 
         builder.UseFramework<FrameworkApplication>();
 
+#pragma warning disable CA2007
         await using var host = builder.Build();
+#pragma warning restore CA2007
 
         await host.RunAsync().ConfigureAwait(false);
     }
@@ -43,6 +48,11 @@ internal sealed class FrameworkApplication : IApplication
     {
         log.LogInformation("Hello, World!");
     }
+}
+
+internal sealed class Settings
+{
+    public string Value { get; set; } = default!;
 }
 
 //--------------------------------------------------------------------------------
