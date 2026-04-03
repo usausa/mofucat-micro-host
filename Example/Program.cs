@@ -1,6 +1,7 @@
 #pragma warning disable IDE0210
 #pragma warning disable CA1812
 #pragma warning disable CA1848
+#pragma warning disable CA1873
 namespace Example;
 
 using Microsoft.Extensions.DependencyInjection;

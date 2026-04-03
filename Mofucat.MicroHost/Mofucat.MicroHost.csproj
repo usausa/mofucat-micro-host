@@ -9,7 +9,7 @@
     <PackageId>Mofucat.MicroHost</PackageId>
     <Title>Mofucat.MicroHost</Title>
     <Description>Micro hosting</Description>
-    <PackageTags>host</PackageTags>
+    <PackageTags>hosting</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
