@@ -5,6 +5,7 @@ namespace Example;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using Mofucat.MicroHost;
 
@@ -14,21 +15,28 @@ internal static class Program
 {
     private static async Task Main(string[] args)
     {
+        // HostBuilder
         var builder = Host.CreateBuilder(args);
 
+        // Logging
         builder.Logging.ClearProviders();
         builder.Services.AddSerilog(options =>
         {
             options.ReadFrom.Configuration(builder.Configuration);
         });
-        // TODO custom logging, setting
 
+        // Setting
+        builder.Services.Configure<Settings>(builder.Configuration.GetSection("Settings"));
+
+        // Application
         builder.UseFramework<FrameworkApplication>();
 
+        // Build
 #pragma warning disable CA2007
         await using var host = builder.Build();
 #pragma warning restore CA2007
 
+        // Run
         await host.RunAsync().ConfigureAwait(false);
     }
 }
@@ -46,14 +54,17 @@ internal sealed class FrameworkApplication : IApplication
 {
     private readonly ILogger<FrameworkApplication> log;
 
-    public FrameworkApplication(ILogger<FrameworkApplication> log)
+    private readonly Settings settings;
+
+    public FrameworkApplication(ILogger<FrameworkApplication> log, IOptions<Settings> settings)
     {
         this.log = log;
+        this.settings = settings.Value;
     }
 
     public void Run()
     {
-        log.LogInformation("Hello, World!");
+        log.LogInformation("Hello, {Value}!", settings.Value);
     }
 }
 
