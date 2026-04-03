@@ -8,12 +8,19 @@ using Microsoft.Extensions.Logging;
 
 using Mofucat.MicroHost;
 
+using Serilog;
+
 internal static class Program
 {
     private static async Task Main(string[] args)
     {
         var builder = Host.CreateBuilder(args);
 
+        builder.Logging.ClearProviders();
+        builder.Services.AddSerilog(options =>
+        {
+            options.ReadFrom.Configuration(builder.Configuration);
+        });
         // TODO custom logging, setting
 
         builder.UseFramework<FrameworkApplication>();
