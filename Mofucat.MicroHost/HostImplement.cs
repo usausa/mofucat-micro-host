@@ -19,13 +19,13 @@ internal sealed class HostImplement : IHost
 
     public ValueTask DisposeAsync()
     {
+        if (serviceProvider is IAsyncDisposable asyncDisposable)
+        {
+            return asyncDisposable.DisposeAsync();
+        }
         if (serviceProvider is IDisposable disposable)
         {
             disposable.Dispose();
-        }
-        else if (serviceProvider is IAsyncDisposable asyncDisposable)
-        {
-            return asyncDisposable.DisposeAsync();
         }
         return ValueTask.CompletedTask;
     }
