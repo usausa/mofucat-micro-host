@@ -1,6 +1,6 @@
 namespace Mofucat.MicroHost;
 
-using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +10,8 @@ using Microsoft.Extensions.Logging;
 
 #pragma warning disable IDE0032
 #pragma warning disable CA1001
+[RequiresDynamicCode("Uses Microsoft.Extensions.DependencyInjection which requires dynamic code.")]
+[RequiresUnreferencedCode("Uses Microsoft.Extensions.DependencyInjection which requires unreferenced code.")]
 internal sealed class HostBuilder : IHostBuilder
 {
     private readonly string[] args;
@@ -49,7 +51,7 @@ internal sealed class HostBuilder : IHostBuilder
         var contentRootPath = settings?.ContentRootPath ?? AppContext.BaseDirectory;
         environment = new HostEnvironment
         {
-            ApplicationName = settings?.ApplicationName ?? Assembly.GetEntryAssembly()?.GetName().Name ?? string.Empty,
+            ApplicationName = settings?.ApplicationName ?? AppDomain.CurrentDomain.FriendlyName,
             EnvironmentName = settings?.EnvironmentName ?? System.Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production",
             ContentRootPath = contentRootPath,
             ContentRootFileProvider = new PhysicalFileProvider(contentRootPath)

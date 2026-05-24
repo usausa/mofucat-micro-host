@@ -23,7 +23,11 @@ internal static class Program
         builder.Logging.ClearProviders();
         builder.Services.AddSerilog(options =>
         {
-            options.ReadFrom.Configuration(builder.Configuration);
+            options
+                .MinimumLevel.Information()
+                .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+                .Enrich.FromLogContext()
+                .WriteTo.Console(formatProvider: null, outputTemplate: "{Timestamp:HH:mm:ss.fff} {Level:u4} [{SourceContext}] - {Message:lj}{NewLine}{Exception}");
         });
 
         // Setting
