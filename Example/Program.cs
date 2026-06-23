@@ -102,7 +102,7 @@ internal sealed class FrameworkRunner : IHostRunner
         this.app = app;
     }
 
-    public ValueTask RunAsync(string[] args)
+    public ValueTask RunAsync(string[] args, CancellationToken cancellation)
     {
         app.Run();
         return ValueTask.CompletedTask;

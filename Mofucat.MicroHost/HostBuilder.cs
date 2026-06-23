@@ -40,13 +40,6 @@ internal sealed class HostBuilder : IHostBuilder
     {
         args = settings?.Args ?? [];
 
-        // Default service provider factory
-        createServiceProvider = () =>
-        {
-            configureContainer(Services);
-            return Services.BuildServiceProvider();
-        };
-
         // Environment
         var contentRootPath = settings?.ContentRootPath ?? AppContext.BaseDirectory;
         environment = new HostEnvironment
@@ -57,6 +50,15 @@ internal sealed class HostBuilder : IHostBuilder
             ContentRootFileProvider = new PhysicalFileProvider(contentRootPath)
         };
 
+        // Default service provider factory
+        createServiceProvider = () =>
+        {
+            configureContainer(Services);
+            return environment.IsDevelopment()
+                ? Services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true, ValidateOnBuild = true })
+                : Services.BuildServiceProvider();
+        };
+
         // Configuration
         configuration = new ConfigurationManager();
 
@@ -64,7 +66,8 @@ internal sealed class HostBuilder : IHostBuilder
         loggingBuilder = new LoggingBuilder(services);
 
         // Add basic services
-        services.AddSingleton<IConfiguration>(configuration);
+        // Register the configuration through a factory so the service provider owns its disposal.
+        services.AddSingleton<IConfiguration>(_ => configuration);
         services.AddSingleton<IHostEnvironment>(environment);
 
         // Default

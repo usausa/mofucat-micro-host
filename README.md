@@ -20,7 +20,7 @@ await host.RunAsync();
 ```csharp
 internal sealed class MyRunner : IHostRunner
 {
-    public ValueTask RunAsync(string[] args)
+    public ValueTask RunAsync(string[] args, CancellationToken cancellationToken)
     {
         Console.WriteLine("Hello!");
         return ValueTask.CompletedTask;
