@@ -66,8 +66,7 @@ internal sealed class HostBuilder : IHostBuilder
         loggingBuilder = new LoggingBuilder(services);
 
         // Add basic services
-        // Register the configuration through a factory so the service provider owns its disposal.
-        services.AddSingleton<IConfiguration>(_ => configuration);
+        services.AddSingleton<IConfiguration>(configuration);
         services.AddSingleton<IHostEnvironment>(environment);
 
         // Default
@@ -106,7 +105,7 @@ internal sealed class HostBuilder : IHostBuilder
     {
         var serviceProvider = createServiceProvider();
 
-        return new HostImplement(args, serviceProvider);
+        return new HostImplement(args, serviceProvider, configuration, environment);
     }
 }
 #pragma warning restore CA1001
