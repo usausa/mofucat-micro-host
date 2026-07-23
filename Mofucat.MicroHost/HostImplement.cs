@@ -57,9 +57,11 @@ internal sealed class HostImplement : IHost
         using var sigTerm = PosixSignalRegistration.Create(PosixSignal.SIGTERM, context => HandleSignal(context, cts));
         // ReSharper restore AccessToDisposedClosure
 
+#pragma warning disable CA2025
         var tasks = serviceProvider.GetServices<IHostRunner>()
-            .Select(runner => RunRunnerAsync(runner, cts))
+            .Select(x => RunRunnerAsync(x, cts))
             .ToArray();
+#pragma warning restore CA2025
         try
         {
             await Task.WhenAll(tasks).ConfigureAwait(false);
