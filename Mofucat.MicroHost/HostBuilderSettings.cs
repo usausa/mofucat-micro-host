@@ -16,5 +16,7 @@ public sealed class HostBuilderSettings
     public string? ApplicationName { get; set; }
 
     public string? ContentRootPath { get; set; }
+
+    public bool ReloadConfigurationOnChange { get; set; } = true;
 }
 #pragma warning restore CA1819

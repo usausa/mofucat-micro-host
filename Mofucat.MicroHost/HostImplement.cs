@@ -17,14 +17,17 @@ internal sealed class HostImplement : IHost
 
     private readonly IHostEnvironment environment;
 
+    private readonly bool ownsConfiguration;
+
     public IServiceProvider Services => serviceProvider;
 
-    public HostImplement(string[] args, IServiceProvider serviceProvider, IConfigurationRoot configuration, IHostEnvironment environment)
+    public HostImplement(string[] args, IServiceProvider serviceProvider, IConfigurationRoot configuration, IHostEnvironment environment, bool ownsConfiguration)
     {
         this.args = args;
         this.serviceProvider = serviceProvider;
         this.configuration = configuration;
         this.environment = environment;
+        this.ownsConfiguration = ownsConfiguration;
     }
 
     public async ValueTask DisposeAsync()
@@ -38,36 +41,49 @@ internal sealed class HostImplement : IHost
             disposable.Dispose();
         }
 
-        if (configuration is IConfigurationBuilder configurationBuilder)
+        if (ownsConfiguration)
         {
-            foreach (var fileProvider in configurationBuilder.Sources.OfType<FileConfigurationSource>().Select(static x => x.FileProvider).Distinct())
-            {
-                (fileProvider as IDisposable)?.Dispose();
-            }
+            (configuration as IDisposable)?.Dispose();
         }
 
-        (configuration as IDisposable)?.Dispose();
         (environment.ContentRootFileProvider as IDisposable)?.Dispose();
     }
 
-    public async ValueTask RunAsync()
+    public async ValueTask RunAsync(CancellationToken cancellationToken = default)
     {
-        using var cts = new CancellationTokenSource();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         // ReSharper disable AccessToDisposedClosure
         using var sigInt = PosixSignalRegistration.Create(PosixSignal.SIGINT, context => HandleSignal(context, cts));
         using var sigTerm = PosixSignalRegistration.Create(PosixSignal.SIGTERM, context => HandleSignal(context, cts));
         // ReSharper restore AccessToDisposedClosure
 
+        var tasks = serviceProvider.GetServices<IHostRunner>()
+            .Select(runner => RunRunnerAsync(runner, cts))
+            .ToArray();
         try
         {
-            foreach (var runner in serviceProvider.GetServices<IHostRunner>())
-            {
-                await runner.RunAsync(args, cts.Token).ConfigureAwait(false);
-            }
+            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cts.IsCancellationRequested)
         {
-            // Canceled by SIGINT/SIGTERM
+            // Ignore
+        }
+    }
+
+    private async Task RunRunnerAsync(IHostRunner runner, CancellationTokenSource cts)
+    {
+        try
+        {
+            await runner.RunAsync(args, cts.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (cts.IsCancellationRequested)
+        {
+            // Ignore
+        }
+        catch
+        {
+            await cts.CancelAsync().ConfigureAwait(false);
+            throw;
         }
     }
 

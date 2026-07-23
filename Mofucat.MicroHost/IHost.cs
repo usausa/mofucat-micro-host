@@ -4,5 +4,5 @@ public interface IHost : IAsyncDisposable
 {
     IServiceProvider Services { get; }
 
-    ValueTask RunAsync();
+    ValueTask RunAsync(CancellationToken cancellationToken = default);
 }

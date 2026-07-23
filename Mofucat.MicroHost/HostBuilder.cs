@@ -20,6 +20,8 @@ internal sealed class HostBuilder : IHostBuilder
 
     private readonly ConfigurationManager configuration;
 
+    private readonly bool ownsConfiguration;
+
     private readonly HostEnvironment environment;
 
     private readonly LoggingBuilder loggingBuilder;
@@ -38,10 +40,24 @@ internal sealed class HostBuilder : IHostBuilder
 
     public HostBuilder(HostBuilderSettings? settings)
     {
-        args = settings?.Args ?? [];
+        args = settings?.Args is { } a ? [.. a] : [];
 
         // Environment
-        var contentRootPath = settings?.ContentRootPath ?? AppContext.BaseDirectory;
+        string contentRootPath;
+        if (settings?.ContentRootPath is { } path)
+        {
+            if (String.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException("ContentRootPath must not be empty.", nameof(settings));
+            }
+
+            contentRootPath = Path.GetFullPath(path);
+        }
+        else
+        {
+            contentRootPath = AppContext.BaseDirectory;
+        }
+
         environment = new HostEnvironment
         {
             ApplicationName = settings?.ApplicationName ?? AppDomain.CurrentDomain.FriendlyName,
@@ -60,7 +76,8 @@ internal sealed class HostBuilder : IHostBuilder
         };
 
         // Configuration
-        configuration = new ConfigurationManager();
+        ownsConfiguration = settings?.Configuration is null;
+        configuration = settings?.Configuration ?? new ConfigurationManager();
 
         // Logging
         loggingBuilder = new LoggingBuilder(services);
@@ -72,8 +89,9 @@ internal sealed class HostBuilder : IHostBuilder
         // Default
         if (!settings?.DisableDefaults ?? true)
         {
-            configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-            configuration.AddJsonFile($"appsettings.{environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
+            var reloadOnChange = settings?.ReloadConfigurationOnChange ?? true;
+            configuration.AddJsonFile(environment.ContentRootFileProvider, "appsettings.json", optional: true, reloadOnChange: reloadOnChange);
+            configuration.AddJsonFile(environment.ContentRootFileProvider, $"appsettings.{environment.EnvironmentName}.json", optional: true, reloadOnChange: reloadOnChange);
             configuration.AddEnvironmentVariables();
 
             services.AddLogging(logging =>
@@ -105,7 +123,7 @@ internal sealed class HostBuilder : IHostBuilder
     {
         var serviceProvider = createServiceProvider();
 
-        return new HostImplement(args, serviceProvider, configuration, environment);
+        return new HostImplement(args, serviceProvider, configuration, environment, ownsConfiguration);
     }
 }
 #pragma warning restore CA1001
