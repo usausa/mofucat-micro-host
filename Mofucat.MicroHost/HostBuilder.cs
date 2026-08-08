@@ -30,6 +30,8 @@ internal sealed class HostBuilder : IHostBuilder
 
     private Action<object> configureContainer = _ => { };
 
+    private bool built;
+
     public ConfigurationManager Configuration => configuration;
 
     public IHostEnvironment Environment => environment;
@@ -93,6 +95,10 @@ internal sealed class HostBuilder : IHostBuilder
             configuration.AddJsonFile(environment.ContentRootFileProvider, "appsettings.json", optional: true, reloadOnChange: reloadOnChange);
             configuration.AddJsonFile(environment.ContentRootFileProvider, $"appsettings.{environment.EnvironmentName}.json", optional: true, reloadOnChange: reloadOnChange);
             configuration.AddEnvironmentVariables();
+            if (args.Length > 0)
+            {
+                configuration.AddCommandLine(args);
+            }
 
             services.AddLogging(logging =>
             {
@@ -121,6 +127,13 @@ internal sealed class HostBuilder : IHostBuilder
 
     public IHost Build()
     {
+        if (built)
+        {
+            throw new InvalidOperationException("Build can only be called once.");
+        }
+
+        built = true;
+
         var serviceProvider = createServiceProvider();
 
         return new HostImplement(args, serviceProvider, configuration, environment, ownsConfiguration);
